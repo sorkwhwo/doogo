@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doogo/component/date_to_string.dart';
 import 'package:doogo/screen/answer_screen.dart';
 import 'package:doogo/screen/main_screen/register_screen.dart';
-import 'package:doogo/start.dart';
+import 'package:doogo/main.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';

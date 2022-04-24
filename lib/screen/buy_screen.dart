@@ -1,6 +1,6 @@
 import 'dart:collection';
 
-import 'package:doogo/start.dart';
+import 'package:doogo/main.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 

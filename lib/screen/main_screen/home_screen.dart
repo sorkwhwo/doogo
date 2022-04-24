@@ -6,7 +6,7 @@ import 'package:doogo/screen/sort_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:doogo/start.dart';
+import 'package:doogo/main.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class HomeScreen extends StatefulWidget {

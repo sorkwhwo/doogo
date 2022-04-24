@@ -1,6 +1,6 @@
 import 'package:doogo/play.dart';
 import 'package:doogo/sign/sign_up.dart';
-import 'package:doogo/start.dart';
+import 'package:doogo/main.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';

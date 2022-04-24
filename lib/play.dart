@@ -3,7 +3,7 @@ import 'package:doogo/screen/main_screen/home_screen.dart';
 import 'package:doogo/screen/main_screen/message_screen.dart';
 import 'package:doogo/screen/main_screen/my_screen.dart';
 import 'package:doogo/screen/main_screen/register_screen.dart';
-import 'package:doogo/start.dart';
+import 'package:doogo/main.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 

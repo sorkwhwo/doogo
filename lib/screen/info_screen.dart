@@ -5,7 +5,7 @@ import 'package:doogo/screen/service_center_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:doogo/start.dart';
+import 'package:doogo/main.dart';
 
 class InfoScreen extends StatefulWidget {
   final String userId;

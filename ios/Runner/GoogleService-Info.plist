@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>335086530845-r5oggqs8lgi5ai12mab9b0cu0aj1vga1.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.335086530845-r5oggqs8lgi5ai12mab9b0cu0aj1vga1</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>335086530845-noi4pi7mt6ucr3tbbj562tt388a2k1jm.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyDMGVWRXrCp3LHd5r8B2XCuMItKGOyQb_E</string>
+	<key>GCM_SENDER_ID</key>
+	<string>335086530845</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.doogo</string>
+	<key>PROJECT_ID</key>
+	<string>doogo-4d3aa</string>
+	<key>STORAGE_BUCKET</key>
+	<string>doogo-4d3aa.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:335086530845:ios:a94fb63006a18fc05df1f4</string>
+</dict>
+</plist>

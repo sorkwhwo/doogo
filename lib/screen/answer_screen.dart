@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doogo/component/admin_email.dart';
 import 'package:doogo/component/circular_progress_indicator.dart';
 import 'package:doogo/screen/main_screen/register_screen.dart';
-import 'package:doogo/start.dart';
+import 'package:doogo/main.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';

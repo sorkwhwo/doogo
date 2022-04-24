@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doogo/component/circular_progress_indicator.dart';
 import 'package:doogo/component/date_to_string.dart';
 import 'package:doogo/screen/answer_screen.dart';
-import 'package:doogo/start.dart';
+import 'package:doogo/main.dart';
 import 'package:flutter/material.dart';
 
 class NoticeScreen extends StatefulWidget {

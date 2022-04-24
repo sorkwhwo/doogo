@@ -1,4 +1,4 @@
-import 'package:doogo/start.dart';
+import 'package:doogo/main.dart';
 import 'package:doogo/play.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

@@ -33,6 +33,7 @@ class _AppState extends State<App> {
       onWillPop: () async {
         return false;
       },
+      //dls
       child: StreamBuilder(
           stream: FirebaseAuth.instance.authStateChanges(),
           builder: (context, snapshot) {

@@ -46,7 +46,7 @@ class _SearchScreenState extends State<SearchScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: MAIN_COLOR,
-        title: Text("검색결과"),
+        title: Text("search"),
       ),
       body: data == null ? Center(
         child: circularProgressIndicator(),

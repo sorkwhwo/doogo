@@ -1,11 +1,13 @@
 import 'dart:collection';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:doogo/component/circular_progress_indicator.dart';
 import 'package:doogo/component/date_to_string.dart';
 import 'package:doogo/screen/answer_screen.dart';
 import 'package:doogo/screen/main_screen/register_screen.dart';
 import 'package:doogo/main.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_translator/google_translator.dart';
 import 'package:intl/intl.dart';
 
 class ServiceCenterScreen extends StatefulWidget {
@@ -23,6 +25,7 @@ class _ServiceCenterScreenState extends State<ServiceCenterScreen> {
       required final onSaved,
       required final validator}) {
     return TextFormField(
+      keyboardType: key==ValueKey(2) ? TextInputType.number:null,
       validator: validator,
       onSaved: onSaved,
       key: key,
@@ -89,7 +92,7 @@ class _ServiceCenterScreenState extends State<ServiceCenterScreen> {
           child: Column(
             children: [
               customTextField(
-                  hintText: "이름을 입력하십시오",
+                  hintText: "Please enter your name.",
                   key: ValueKey(1),
                   onSaved: (value) {
                     name = value;
@@ -103,7 +106,7 @@ class _ServiceCenterScreenState extends State<ServiceCenterScreen> {
                 height: 16,
               ),
               customTextField(
-                  hintText: "휴대전화 번호를 입력하십시오",
+                  hintText: "Please enter your phone.",
                   key: ValueKey(2),
                   onSaved: (value) {
                     phone = value;
@@ -117,7 +120,7 @@ class _ServiceCenterScreenState extends State<ServiceCenterScreen> {
                 height: 16,
               ),
               customTextField(
-                  hintText: "제목을 입력하십시오.",
+                  hintText: "Please enter the subject.",
                   key: ValueKey(3),
                   onSaved: (value) {
                     theme = value;
@@ -131,7 +134,7 @@ class _ServiceCenterScreenState extends State<ServiceCenterScreen> {
                 height: 16,
               ),
               customTextField(
-                  hintText: "내용을 입력하십시오.",
+                  hintText: "Please enter your details.",
                   key: ValueKey(4),
                   maxLines: 20,
                   onSaved: (value) {
@@ -153,7 +156,7 @@ class _ServiceCenterScreenState extends State<ServiceCenterScreen> {
                       child: Text(
                         "문의하기",
                         style: TextStyle(color: Colors.indigo),
-                      )),
+                      ).translate()),
                 ],
               )
             ],
@@ -185,9 +188,14 @@ class _ServiceCenterScreenState extends State<ServiceCenterScreen> {
             itemBuilder: (context, index) {
               final data = snapshot.data!.docs[index];
               return Material(
-                child:InkWell(
+                child: InkWell(
                   onTap: () {
-                    Navigator.of(context).push(MaterialPageRoute(builder: (context) =>AnswerScreen(inquire : data["inquire"],theme: data["theme"], id: data["id"], dateTime: data["date"])));
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => AnswerScreen(
+                            inquire: data["inquire"],
+                            theme: data["theme"],
+                            id: data["id"],
+                            dateTime: data["date"])));
                   },
                   child: Column(
                     children: [
@@ -202,16 +210,16 @@ class _ServiceCenterScreenState extends State<ServiceCenterScreen> {
                             ),
                             Expanded(
                                 child: Text(
-
                               "${data["theme"]}",
                               maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                              overflow: TextOverflow.ellipsis,
                             )),
-                            if(data["answer"]!="null")
-                            Text("답변완료",style: TextStyle(
-                              color: Colors.green,
-                              fontSize: 12
-                            ),),
+                            if (data["answer"] != "null")
+                              Text(
+                                "답변완료",
+                                style: TextStyle(
+                                    color: Colors.green, fontSize: 10),
+                              ).translate(),
                             SizedBox(
                               width: 16,
                             ),
@@ -231,19 +239,53 @@ class _ServiceCenterScreenState extends State<ServiceCenterScreen> {
       },
     );
   }
+  QuerySnapshot<Map<String,dynamic>>? myData;
+
+  getMyData() async{
+    myData =  await db.collection("users").where("id",isEqualTo: auth.currentUser!.email).get();
+    setState((){
+
+    });
+  }
 
   @override
+  void initState(){
+    super.initState();
+  getMyData();
+  }
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          actions: [
-            IconButton(
-                onPressed: iconButtonOnPressed,
-                icon: isList ? Icon(Icons.report) : Icon(Icons.list))
-          ],
-          backgroundColor: MAIN_COLOR,
-          title: isList ? Text("문의 및 신고내역") : Text("서비스 센터(문의 및 신고하기)"),
+
+    if(myData ==null){
+      return Scaffold(
+        body: Center(
+          child: circularProgressIndicator(),
         ),
-        body: isList ? yesIsList() : notIsList());
+      );
+    }
+    return  GoogleTranslatorInit("AIzaSyByt9uRm_-J13b3Uyo7F-PQD9z2ECqSxtQ",
+        translateFrom: Locale('ko'),
+        translateTo: Locale('${myData!.docs[0]["language"]}'),
+      builder: () {
+        return GestureDetector(
+          onTap: (){
+            FocusScope.of(context).unfocus();
+          },
+          child: Scaffold(
+              appBar: AppBar(
+                actions: [
+                  IconButton(
+                      onPressed: iconButtonOnPressed,
+                      icon: isList ? Icon(Icons.report) : Icon(Icons.list))
+                ],
+                backgroundColor: MAIN_COLOR,
+                title: isList
+                    ? Text("문의 및 신고내역").translate()
+                    : Text("문의 및 신고하기").translate(),
+              ),
+              body: isList ? yesIsList() : notIsList()),
+        );
+      }
+    );
   }
 }

@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
-
+import 'package:doogo/component/circular_progress_indicator.dart';
 import 'package:doogo/screen/service_center_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chat_bubble/bubble_type.dart';
 import 'package:flutter_chat_bubble/chat_bubble.dart';
 import 'package:flutter_chat_bubble/clippers/chat_bubble_clipper_8.dart';
+import 'package:google_translator/google_translator.dart';
 
 class ChatScreen extends StatefulWidget {
   final String counterId;
@@ -56,10 +57,16 @@ class _ChatScreenState extends State<ChatScreen> {
                     .size
                     .width * 0.5,
               ),
-              child: Text(
-                message,
-                style: TextStyle(color: Colors.black),
-              ),
+              child: GoogleTranslatorInit(
+                  "AIzaSyByt9uRm_-J13b3Uyo7F-PQD9z2ECqSxtQ",
+                  translateFrom: Locale('${counterData!.docs[0]["language"]}'),
+                  translateTo: Locale('${myData!.docs[0]["language"]}'),
+                  builder: () {
+                    return Text(
+                      message,
+                      style: TextStyle(color: Colors.black),
+                    ).translate();
+                  }),
             ),
           ],
         ),
@@ -69,53 +76,96 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Timer? timer;
 
+  QuerySnapshot<Map<String, dynamic>>? counterData;
+  QuerySnapshot<Map<String, dynamic>>? myData;
+
+  getCounterData() async {
+    counterData = await db
+        .collection("users")
+        .where("id", isEqualTo: widget.counterId)
+        .get();
+    setState(() {});
+  }
+
+  getMyData() async {
+    myData = await db
+        .collection("users")
+        .where("id", isEqualTo: auth.currentUser!.email)
+        .get();
+    setState(() {});
+  }
 
   @override
   void initState() {
     super.initState();
     beForeTimer();
-    timer = Timer.periodic(Duration(seconds: 1), (timer)
-    async{
-      final targetChat = await db.collection("chat").where("sender_id",isEqualTo: widget.counterId)
-          .where("receiver_id",isEqualTo: auth.currentUser!.email).where("check",isNull: true)
+    getMyData();
+    getCounterData();
+    timer = Timer.periodic(Duration(seconds: 1), (timer) async {
+      final targetChat = await db
+          .collection("chat")
+          .where("sender_id", isEqualTo: widget.counterId)
+          .where("receiver_id", isEqualTo: auth.currentUser!.email)
+          .where("check", isNull: true)
           .get();
 
-      for(int i=0;i<targetChat.docs.length;i++){
-        db.collection("chat").doc(targetChat.docs[i].id).update({"check":"check"});
+      for (int i = 0; i < targetChat.docs.length; i++) {
+        db
+            .collection("chat")
+            .doc(targetChat.docs[i].id)
+            .update({"check": "check"});
       }
-
     });
   }
 
-
-  void beForeTimer() async{
-
-    final targetChat = await db.collection("chat").where("sender_id",isEqualTo: widget.counterId)
-        .where("receiver_id",isEqualTo: auth.currentUser!.email).where("check",isNull: true)
+  void beForeTimer() async {
+    final targetChat = await db
+        .collection("chat")
+        .where("sender_id", isEqualTo: widget.counterId)
+        .where("receiver_id", isEqualTo: auth.currentUser!.email)
+        .where("check", isNull: true)
         .get();
 
-    for(int i=0;i<targetChat.docs.length;i++){
-      db.collection("chat").doc(targetChat.docs[i].id).update({"check":"check"});
-    };
+    for (int i = 0; i < targetChat.docs.length; i++) {
+      db
+          .collection("chat")
+          .doc(targetChat.docs[i].id)
+          .update({"check": "check"});
+    }
+    ;
   }
+
   @override
-  void dispose(){
+  void dispose() {
     timer!.cancel();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         actions: [
-          TextButton(onPressed: (){
-            Navigator.of(context).push(MaterialPageRoute(builder: (context) =>ServiceCenterScreen()));
-          }, child: Image.asset("asset/img/sirn.png",color: Colors.white,width: 20,),)
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => ServiceCenterScreen()));
+            },
+            child: Image.asset(
+              "asset/img/sirn.png",
+              color: Colors.white,
+              width: 20,
+            ),
+          )
         ],
         backgroundColor: MAIN_COLOR,
         title: Text(widget.counterId),
       ),
-      body: Padding(
+      body: (myData == null || counterData == null)
+          ? Center(
+        child: circularProgressIndicator(),
+      )
+          : Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10),
         child: StreamBuilder(
           stream: db
@@ -123,7 +173,8 @@ class _ChatScreenState extends State<ChatScreen> {
               .orderBy("date", descending: true)
               .snapshots(),
           builder: (BuildContext context,
-              AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
+              AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>>
+              snapshot) {
             if (!snapshot.hasData) {
               return Center(
                 child: CircularProgressIndicator(
@@ -159,7 +210,8 @@ class _ChatScreenState extends State<ChatScreen> {
 
                                 if (senderId == auth.currentUser!.email) {
                                   return Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    mainAxisAlignment:
+                                    MainAxisAlignment.end,
                                     children: [
                                       Text(
                                         "${dateTime.year}.${dateTime.month
@@ -170,14 +222,16 @@ class _ChatScreenState extends State<ChatScreen> {
                                             2, "0")}:${dateTime.minute
                                             .toString().padLeft(2, "0")}",
                                         style: TextStyle(
-                                            color: Colors.grey, fontSize: 10),
+                                            color: Colors.grey,
+                                            fontSize: 10),
                                       ),
                                       SizedBox(
                                         width: 8,
                                       ),
                                       getSenderView(
                                           ChatBubbleClipper8(
-                                              type: BubbleType.sendBubble),
+                                              type:
+                                              BubbleType.sendBubble),
                                           context,
                                           message)
                                     ],
@@ -187,7 +241,8 @@ class _ChatScreenState extends State<ChatScreen> {
                                     children: [
                                       getReceiverView(
                                           ChatBubbleClipper8(
-                                              type: BubbleType.receiverBubble),
+                                              type: BubbleType
+                                                  .receiverBubble),
                                           context,
                                           message),
                                       SizedBox(
@@ -202,7 +257,8 @@ class _ChatScreenState extends State<ChatScreen> {
                                             2, "0")}:${dateTime.minute
                                             .toString().padLeft(2, "0")}",
                                         style: TextStyle(
-                                            color: Colors.grey, fontSize: 10),
+                                            color: Colors.grey,
+                                            fontSize: 10),
                                       )
                                     ],
                                   );
@@ -244,8 +300,45 @@ class _NewMessageState extends State<NewMessage> {
   TextEditingController controller = TextEditingController();
   String message = "";
 
+  QuerySnapshot<Map<String, dynamic>>? data;
+  QuerySnapshot<Map<String, dynamic>>? data2;
+
+
+  void getData() async {
+    data = await db.collection("conversations").where(
+        "receiver_id", isEqualTo: auth.currentUser!.email).where(
+        "sender_id", isEqualTo: widget.receiver_id)
+        .get();
+
+    setState(() {
+
+    });
+  }
+
+  void getData2() async {
+    data2 = await db.collection("conversations").where(
+        "receiver_id", isEqualTo: widget.receiver_id).where(
+        "sender_id", isEqualTo: auth.currentUser!.email)
+        .get();
+
+    setState(() {
+
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getData();
+    getData2();
+  }
+
   @override
   Widget build(BuildContext context) {
+
+    if(data==null || data2==null){
+      return Container();
+    }
     return Padding(
       padding: const EdgeInsets.only(left: 8, top: 5, bottom: 5),
       child: Container(
@@ -283,7 +376,28 @@ class _NewMessageState extends State<NewMessage> {
                 map.putIfAbsent(
                     "sender_id", () => auth.currentUser!.email);
 
+
                 db.collection("chat").add(map);
+
+
+                if(data!.docs.isEmpty && data2!.docs.isEmpty){
+                  db.collection("conversations").add(map);
+                  data2 = await db.collection("conversations").where(
+                      "receiver_id", isEqualTo: widget.receiver_id).where(
+                      "sender_id", isEqualTo: auth.currentUser!.email)
+                      .get();
+                }else{
+                  HashMap<String, dynamic> map2 = new HashMap();
+                  map2.putIfAbsent("message", () => message);
+                  map2.putIfAbsent("date", () => Timestamp.now());
+                  if(data!.docs.isNotEmpty){
+                    db.collection("conversations").doc(data!.docs[0].id).update(map2);
+                  }else{
+                    db.collection("conversations").doc(data2!.docs[0].id).update(map2);
+                  }
+                }
+
+
                 setState(() {
                   controller.text = "";
                   message = "";

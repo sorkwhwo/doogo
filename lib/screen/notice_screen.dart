@@ -3,7 +3,9 @@ import 'package:doogo/component/circular_progress_indicator.dart';
 import 'package:doogo/component/date_to_string.dart';
 import 'package:doogo/screen/answer_screen.dart';
 import 'package:doogo/main.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_translator/google_translator.dart';
 
 class NoticeScreen extends StatefulWidget {
   final date;
@@ -26,6 +28,18 @@ class _NoticeScreenState extends State<NoticeScreen> {
   // String? member;
   FirebaseFirestore db = FirebaseFirestore.instance;
 
+  FirebaseAuth auth = FirebaseAuth.instance;
+
+  QuerySnapshot<Map<String, dynamic>>? myData;
+
+  getMyData() async {
+    myData = await db
+        .collection("users")
+        .where("id", isEqualTo: auth.currentUser!.email)
+        .get();
+    setState(() {});
+  }
+
   Widget images() {
     return Stack(
       children: [
@@ -34,6 +48,7 @@ class _NoticeScreenState extends State<NoticeScreen> {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10),
             child: PageView(
+                allowImplicitScrolling: true,
                 controller: controller,
                 scrollDirection: Axis.horizontal,
                 children: photos
@@ -80,6 +95,7 @@ class _NoticeScreenState extends State<NoticeScreen> {
   @override
   initState() {
     super.initState();
+    getMyData();
     controller.addListener(() {
       if (controller.page!.round() + 1 != currentPage) {
         setState(() {
@@ -103,9 +119,7 @@ class _NoticeScreenState extends State<NoticeScreen> {
       }
     }
 
-    setState((){
-
-    });
+    setState(() {});
   }
 
   @override
@@ -116,57 +130,63 @@ class _NoticeScreenState extends State<NoticeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: MAIN_COLOR,
-        title: Text("공지사항"),
-      ),
-      body: targetData == null
-          ? Center(
-              child: circularProgressIndicator(),
-            )
-          : SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    height: 8,
-                  ),
-                  if(photos.length!=0)
-                  images(),
-
-
-                  Container(
-                    padding: EdgeInsets.all(16),
-                    width: MediaQuery.of(context).size.width,
-                    color: Colors.grey[200],
-                    child: Text(
-                      "공지제목"),
-                  ),
-                  SizedBox(
-                    height: 8,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(targetData!["theme"]),
-                  ),
-                  Container(
-                    padding: EdgeInsets.all(16),
-                    width: MediaQuery.of(context).size.width,
-                    color: Colors.grey[200],
-                    child: Text(
-                        "공지내용"),
-                  ),
-                  SizedBox(
-                    height: 8,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(targetData!["notice"]),
-                  ),
-                ],
+    if (myData == null) {
+      return Scaffold(
+        body: Center(
+          child: circularProgressIndicator(),
+        ),
+      );
+    }
+    return GoogleTranslatorInit("AIzaSyByt9uRm_-J13b3Uyo7F-PQD9z2ECqSxtQ",
+        translateFrom: Locale('ko'),
+        translateTo: Locale('${myData!.docs[0]["language"]}'), builder: () {
+      return Scaffold(
+        appBar: AppBar(
+          backgroundColor: MAIN_COLOR,
+          title: Text("공지").translate(),
+        ),
+        body: targetData == null
+            ? Center(
+                child: circularProgressIndicator(),
+              )
+            : SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      height: 8,
+                    ),
+                    if (photos.length != 0) images(),
+                    Container(
+                      padding: EdgeInsets.all(16),
+                      width: MediaQuery.of(context).size.width,
+                      color: Colors.grey[200],
+                      child: Text("공지제목").translate(),
+                    ),
+                    SizedBox(
+                      height: 8,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(targetData!["theme"]).translate(),
+                    ),
+                    Container(
+                      padding: EdgeInsets.all(16),
+                      width: MediaQuery.of(context).size.width,
+                      color: Colors.grey[200],
+                      child: Text("공지내용").translate(),
+                    ),
+                    SizedBox(
+                      height: 8,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(targetData!["notice"]).translate(),
+                    ),
+                  ],
+                ),
               ),
-            ),
-    );
+      );
+    });
   }
 }

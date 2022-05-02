@@ -32,6 +32,7 @@ class _SignUpState extends State<SignUp> {
         try{
 
           final singUp =  await auth.createUserWithEmailAndPassword(email: email, password: password);
+
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Sign up is complete.")));
           Navigator.of(context).pop();
 
@@ -217,9 +218,7 @@ class _SignUpState extends State<SignUp> {
                           //         ),)),
                           //   ),
                           // ),
-                          SizedBox(
-                            width: 10,
-                          ),
+
                           Expanded(
                             child: Container(
                               height: 45,

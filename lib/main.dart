@@ -9,7 +9,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      statusBarColor: MAIN_COLOR
+      statusBarColor: MAIN_COLOR,
+
   ));
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false,
@@ -35,6 +36,7 @@ class _AppState extends State<App> {
       child: StreamBuilder(
           stream: FirebaseAuth.instance.authStateChanges(),
           builder: (context, snapshot) {
+            print("실행");
             if (snapshot.hasData) {
               return Play();
             }

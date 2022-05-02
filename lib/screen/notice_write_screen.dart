@@ -147,7 +147,7 @@ class _NoticeWriteScreenState extends State<NoticeWriteScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: MAIN_COLOR,
-        title: Text("Notice"),
+        title: Text("공지사항"),
       ),
       body: SingleChildScrollView(
         child: Padding(

@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:doogo/component/circular_progress_indicator.dart';
+import 'package:doogo/screen/language_screen.dart';
 import 'package:doogo/screen/main_screen/home_screen.dart';
 import 'package:doogo/screen/main_screen/message_screen.dart';
 import 'package:doogo/screen/main_screen/my_screen.dart';
@@ -6,6 +8,8 @@ import 'package:doogo/screen/main_screen/register_screen.dart';
 import 'package:doogo/main.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_translator/google_translator.dart';
+
 
 class Play extends StatefulWidget {
   @override
@@ -14,15 +18,44 @@ class Play extends StatefulWidget {
 
 class _PlayState extends State<Play> {
   FirebaseFirestore db = FirebaseFirestore.instance;
-  FirebaseAuth auth = FirebaseAuth.instance;
+
   bool isHome = true;
   bool isRegister = false;
   bool isMessage = false;
   bool isMy = false;
+  QuerySnapshot<Map<String, dynamic>>? data;
+  FirebaseAuth auth = FirebaseAuth.instance;
 
   @override
   void initState() {
     super.initState();
+    getData();
+  }
+
+  void getData() async {
+    data = await db
+        .collection("users")
+        .where("id", isEqualTo: auth.currentUser!.email)
+        .get();
+
+    if (data!.docs.isNotEmpty) {
+      await db
+          .collection("users")
+          .doc(auth.currentUser!.email)
+          .update({"on": "on"});
+    } else {
+      await db
+          .collection("users")
+          .doc(auth.currentUser!.email)
+          .set({"id": auth.currentUser!.email, "on": "on"});
+    }
+
+    data = await db
+        .collection("users")
+        .where("id", isEqualTo: auth.currentUser!.email)
+        .get();
+
+    setState(() {});
   }
 
   Widget bottomBar(bool isReceived) {
@@ -50,7 +83,6 @@ class _PlayState extends State<Play> {
                   Image.asset("asset/img/home.png",
                       height: 25, color: isHome ? MAIN_COLOR : Colors.black),
                   SizedBox(
-                    //fff
                     height: 5,
                   ),
                   Text(
@@ -200,50 +232,87 @@ class _PlayState extends State<Play> {
     );
   }
 
+  // Widget getTranslate() {
+  //   return Padding(
+  //     padding: const EdgeInsets.all(30.0),
+  //     child: GoogleTranslatorInit("AIzaSyByt9uRm_-J13b3Uyo7F-PQD9z2ECqSxtQ",
+  //       translateFrom: Locale('ko'),
+  //       translateTo: Locale('tr'),
+  //       // automaticDetection: , In case you don't know the user language will want to traslate,
+  //       // cacheDuration: Duration(days: 13), The duration of the cache translation.
+  //       builder: () => Text(
+  //         "만나서 반갑습니다.").translate()
+  //     ),
+  //   );
+  // }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-                child: isHome
-                    ? HomeScreen()
-                    : isRegister
-                        ? RegisterScreen(goHome: (){
+        body: data == null
+            ? Center(
+                child: circularProgressIndicator(),
+              )
+            : !data!.docs[0].data().containsKey("language")
+                ? LanguageScreen(onFinish: () async {
+                    data = await db
+                        .collection("users")
+                        .where("id", isEqualTo: auth.currentUser!.email)
+                        .get();
 
-                          setState((){
-                            isHome = true;
-                            isMessage = false;
-                            isMy = false;
-                            isRegister = false;
-                          });
-                },)
-                        : isMy
-                            ? MyScreen()
-                            : MessageScreen()),
-            StreamBuilder(
-              stream: db
-                  .collection("chat")
-                  .where("receiver_id", isEqualTo: auth.currentUser!.email)
-                  .where("check", isNull: true)
-                  .snapshots(),
-              builder: (BuildContext context,
-                  AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
-                if (!snapshot.hasData) {
-                  return Container();
-                } else {
-                  if (snapshot.data!.docs.length > 0) {
-                    return bottomBar(true);
-                  } else {
-                    return bottomBar(false);
-                  }
-                }
-              },
-            ),
-          ],
-        ),
-      ),
-    );
+                    setState(() {});
+                  })
+                : GoogleTranslatorInit(
+                    "AIzaSyByt9uRm_-J13b3Uyo7F-PQD9z2ECqSxtQ",
+                    translateFrom: Locale('ko'),
+                    translateTo: Locale("${data!.docs[0]["language"]}"),
+                    builder: () {
+                    return SafeArea(
+                      top: isHome ? false : true,
+                      child: Column(
+                        children: [
+                          Expanded(
+                              child: isHome
+                                  ? HomeScreen()
+                                  : isRegister
+                                      ? RegisterScreen(
+                                          goHome: () {
+                                            setState(() {
+                                              isHome = true;
+                                              isMessage = false;
+                                              isMy = false;
+                                              isRegister = false;
+                                            });
+                                          },
+                                        )
+                                      : isMy
+                                          ? MyScreen()
+                                          : MessageScreen()),
+                          StreamBuilder(
+                            stream: db
+                                .collection("chat")
+                                .where("receiver_id",
+                                    isEqualTo: auth.currentUser!.email)
+                                .where("check", isNull: true)
+                                .snapshots(),
+                            builder: (BuildContext context,
+                                AsyncSnapshot<
+                                        QuerySnapshot<Map<String, dynamic>>>
+                                    snapshot) {
+                              if (!snapshot.hasData) {
+                                return Container();
+                              } else {
+                                if (snapshot.data!.docs.length > 0) {
+                                  return bottomBar(true);
+                                } else {
+                                  return bottomBar(false);
+                                }
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                    );
+                  }));
   }
 }
